@@ -1,6 +1,9 @@
 #include <stdlib.h> 
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
+#include <ctype.h>
+#include <string.h>
 
 //Gets a random word from word.txt
 void getWord(char* word) {
@@ -24,8 +27,43 @@ void getWord(char* word) {
   }
 }
 
-int main() {
-  char word[5]; 
-  getWord(word);
-  printf("%s", word);
+//Checks if user input is all letters
+bool isLetter(const char* userInput) {
+  int i = 0;
+  while (userInput[i] != '\0') {
+    if (!isalpha(userInput[i])) {
+      return false;
+    }
+    i++;
+  } 
+  return true;
 }
+
+//Checks if user input is valid
+bool isValid(const char* userInput) {
+   if (strlen(userInput) != 5) {
+    return false; 
+  } if (!isLetter(userInput)) {
+    return false; 
+  } 
+  return true;
+}
+
+int main() {
+  char word[6], userInput[6];
+  int guessCount;
+  getWord(word);
+
+  printf("Welcome to Wordle, enter a word to start guessing\n");
+  fgets(userInput, sizeof(userInput), stdin);
+
+  while (!isValid(userInput)) {
+    printf("Input invalid, please enter valid input\n");
+    userInput[strcspn(userInput, "\n")] = 0;
+    fgets(userInput, sizeof(userInput), stdin);
+  } 
+  
+  printf("Valid input");
+  return 0;
+}
+
