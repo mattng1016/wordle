@@ -8,6 +8,11 @@
 #define WORD_COUNT 5
 #define FILE_SIZE 14855
 
+#define GREEN_COLOR "\033[38;5;48m" 
+#define YELLOW_COLOR "\033[38;5;214m"
+#define RED_COLOR "\033[38;5;196m"  
+#define RESET_COLOR "\e[0m"
+
 enum result {
   INCORRECT, INCLUDED, CORRECT
 };
@@ -66,6 +71,7 @@ bool charInWord(const char* word, const char c) {
   return false;
 }
 
+// Checks if given characters match 
 bool charToChar(const char* word, const char* c, int pos) {
   if (c[pos] == word[pos]) {
     return true;
@@ -81,56 +87,63 @@ void inputValidation(char* userInput, FILE* s) {
       userInput[strcspn(userInput, "\n")] = 0;
       scanf("%s", userInput);
       while ((c = getchar()) != '\n' && c != EOF);
-
   }
 }
 
-void printIcon(const int arr[]) {
+// Prints colored word to help user
+void printHelper(const int arr[], const char* userInput) {
   for (int i = 0; i < WORD_COUNT; i++) {
     switch (arr[i]) {
       case 0:
-        printf("🔴");
+        printf(RED_COLOR"%c", userInput[i]);
+        printf(RESET_COLOR);
         break;
       case 1:
-        printf("🟡");
-        break;
+        printf(YELLOW_COLOR"%c", userInput[i]);
+        printf(RESET_COLOR);
+        break;      
       case 2: 
-        printf("️🟢");
-        break;
-      default: 
-        printf("ERROR");
+        printf(GREEN_COLOR"%c", userInput[i]);
+        printf(RESET_COLOR);
         break;
     }
+  }
+  printf("\n");
+}
+
+// Fills in the correct array
+void fillCorrect(int arr[], const char* word, const char* userInput) {
+  for (int i = 0; i < WORD_COUNT; i++) {
+    if (charToChar(word, userInput, i)) {
+      arr[i] = 2;
+    } else if (charInWord(word, userInput[i])) {
+      arr[i] = 1;
+    } else arr[i] = 0;
+  }
+}
+
+void gameplayLoop(const char* word, FILE* stdin) {
+  char userInput[512];
+  int guessCount = 0, correct[5] = {0, 0, 0, 0, 0};
+
+  while (strncmp(word, userInput, WORD_COUNT) != 0) {
+    guessCount++;
+    printf("\nGuess %d: ", guessCount);
+    scanf("%s", userInput);
+    inputValidation(userInput, stdin);
+    fillCorrect(correct, word, userInput);
+    printHelper(correct, userInput);
   }
 }
 
 int main() {
-  char word[WORD_COUNT+1], userInput[512];
-  int guessCount = 1, correct[5] = {0, 0, 0, 0, 0};
+  char word[WORD_COUNT+1]; 
   getWord(word);
 
   printf("Welcome to Wordle, enter a word to start guessing, word is %s", word);
-  printf("Guess %d: ", guessCount);
-  scanf("%s", userInput);
-  //while ((c = getchar()) != '\n' && c != EOF);
-  inputValidation(userInput, stdin); 
+  gameplayLoop(word, stdin);
 
-  while (strncmp(word, userInput, WORD_COUNT) != 0) {
-    for (int i = 0; i < sizeof(correct)/sizeof(int) ; i++) {
-      if (charToChar(word, userInput, i)) {
-        correct[i] = 2;
-      } else if (charInWord(word, userInput[i])) {
-        correct[i] = 1; 
-      } else correct[i] = 0;
-    }    
-    guessCount++;
-    printIcon(correct);
-    printf("\nGuess %d: ", guessCount);
-    scanf("%s", userInput);
-    inputValidation(userInput, stdin);
-  }
-
-  printf("Congratulations, the word is: %s", word);
+  printf("\nCongratulations, the word is: %s", word);
 
   return 0;
 }
