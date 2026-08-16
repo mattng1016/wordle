@@ -180,6 +180,7 @@ void defaultGameplayLoop(const char* word, FILE* stdin) {
   } else printf("Congratulations, the word is: %s", word);
 }
 
+// Selects gamemode
 int gamemodeSelect(FILE* stdin) {
   int gamemode;
   printf("\n\nWelcome to Wordle. \n");
@@ -197,7 +198,6 @@ int main() {
   char word[WORD_COUNT+1]; 
   getWord(word);
 
-  printf("word: %s", word);
   gamemode = gamemodeSelect(stdin);
 
   switch (gamemode) {
