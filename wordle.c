@@ -112,18 +112,36 @@ void printHelper(const int arr[], const char* userInput) {
 }
 
 // Fills in the correct array
-void fillCorrect(int arr[], const char* word, const char* userInput) {
+void fillCorrect(int correct[], const char* word, const char* userInput) {
   for (int i = 0; i < WORD_COUNT; i++) {
     if (charToChar(word, userInput, i)) {
-      arr[i] = 2;
+      correct[i] = 2;
     } else if (charInWord(word, userInput[i])) {
-      arr[i] = 1;
-    } else arr[i] = 0;
+      correct[i] = 1;
+    } else correct[i] = 0;
   }
 }
 
+// Prints player's best attempt
+void printBestAttempt(int correct[], char* bestAttempt, const char* word) {
+  for (int i = 0; i < WORD_COUNT; i++) {
+    switch (correct[i]) {
+      case 2:
+        bestAttempt[i] = word[i];
+        break;
+      default:
+        if (bestAttempt[i] != word[i]) {
+          bestAttempt[i] = '-';
+        }
+        break;
+    }
+  }
+  printf("%s\n", bestAttempt);
+}
+
+// Core wordle gameplay loop
 void gameplayLoop(const char* word, FILE* stdin) {
-  char userInput[512];
+  char userInput[512], bestAttempt[WORD_COUNT+1];
   int guessCount = 0, correct[5] = {0, 0, 0, 0, 0};
 
   while (strncmp(word, userInput, WORD_COUNT) != 0) {
@@ -133,6 +151,7 @@ void gameplayLoop(const char* word, FILE* stdin) {
     inputValidation(userInput, stdin);
     fillCorrect(correct, word, userInput);
     printHelper(correct, userInput);
+    printBestAttempt(correct, bestAttempt, word);
   }
 }
 
