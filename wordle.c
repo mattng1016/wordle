@@ -33,6 +33,7 @@ void getWord(char* word) {
   } else {
     printf("File error");
   }
+  word[strcspn(word, "\n")] = 0;
 }
 
 // Checks if user input is all letters
@@ -135,6 +136,13 @@ void printBestAttempt(int correct[], char* bestAttempt, const char* word) {
   printf("%s\n", bestAttempt);
 }
 
+bool sameWordle(const char* word, const char* userInput) {
+  if (strncmp(word, userInput, WORD_COUNT) == 0) {
+    return true;
+  }
+  return false;
+}
+
 // Unlimited wordle gameplay loop
 void unlimitedGameplayLoop(const char* word, FILE* stdin) {
   char userInput[512], bestAttempt[WORD_COUNT+1];
@@ -157,7 +165,7 @@ void defaultGameplayLoop(const char* word, FILE* stdin) {
   char userInput[512], bestAttempt[WORD_COUNT+1];
   int guessCount = 0, correct[5] = {0, 0, 0, 0, 0};
 
-  while (strncmp(word, userInput, WORD_COUNT) != 0 && guessCount < 5) {
+  while (!sameWordle(word, userInput) && guessCount < 5) {
     guessCount++;
     printf("\n%d guesses left: ", 5 - guessCount + 1);
     scanf("%s", userInput);
@@ -166,6 +174,22 @@ void defaultGameplayLoop(const char* word, FILE* stdin) {
     printHelper(correct, userInput);
     printBestAttempt(correct, bestAttempt, word);
   }
+  
+  if (!sameWordle(word, userInput)) {
+    printf("\nYou ran out of guesses, the word is: %s", word);
+  } else printf("Congratulations, the word is: %s", word);
+}
+
+int gamemodeSelect(FILE* stdin) {
+  int gamemode;
+  printf("\n\nWelcome to Wordle. \n");
+  do {
+    printf("Choose 1 (standard) or 2 (unlimited guesses): ");
+    scanf("%d", &gamemode);
+    while (getchar() != '\n');
+  } while (gamemode < 1 || gamemode > 2);
+
+  return gamemode;
 }
 
 int main() {
@@ -173,14 +197,14 @@ int main() {
   char word[WORD_COUNT+1]; 
   getWord(word);
 
-  printf("Welcome to Wordle, choose (1) standard or (2) unlimited guess: ");
-  scanf("%d", &gamemode);
+  printf("word: %s", word);
+  gamemode = gamemodeSelect(stdin);
 
   switch (gamemode) {
     case 2:
       unlimitedGameplayLoop(word, stdin);
       break;
-    default:
+    case 1:
       defaultGameplayLoop(word, stdin);
       break;
   }
@@ -188,4 +212,3 @@ int main() {
   return 0;
 }
 
-//Todo list: 1. fix word having newline, 2. validate valid word from list, 3. add message for defautl mode
