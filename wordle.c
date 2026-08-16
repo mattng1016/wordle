@@ -13,10 +13,6 @@
 #define RED_COLOR "\033[38;5;196m"  
 #define RESET_COLOR "\e[0m"
 
-enum result {
-  INCORRECT, INCLUDED, CORRECT
-};
-
 // Gets a random word from word.txt
 void getWord(char* word) {
   srand(time(NULL));
@@ -139,8 +135,8 @@ void printBestAttempt(int correct[], char* bestAttempt, const char* word) {
   printf("%s\n", bestAttempt);
 }
 
-// Core wordle gameplay loop
-void gameplayLoop(const char* word, FILE* stdin) {
+// Unlimited wordle gameplay loop
+void unlimitedGameplayLoop(const char* word, FILE* stdin) {
   char userInput[512], bestAttempt[WORD_COUNT+1];
   int guessCount = 0, correct[5] = {0, 0, 0, 0, 0};
 
@@ -153,17 +149,43 @@ void gameplayLoop(const char* word, FILE* stdin) {
     printHelper(correct, userInput);
     printBestAttempt(correct, bestAttempt, word);
   }
+  printf("Congratulations, the word is: %s", word);
+}
+
+// Default wordle gameplay loop (5 guesses)
+void defaultGameplayLoop(const char* word, FILE* stdin) {
+  char userInput[512], bestAttempt[WORD_COUNT+1];
+  int guessCount = 0, correct[5] = {0, 0, 0, 0, 0};
+
+  while (strncmp(word, userInput, WORD_COUNT) != 0 && guessCount < 5) {
+    guessCount++;
+    printf("\n%d guesses left: ", 5 - guessCount + 1);
+    scanf("%s", userInput);
+    inputValidation(userInput, stdin);
+    fillCorrect(correct, word, userInput);
+    printHelper(correct, userInput);
+    printBestAttempt(correct, bestAttempt, word);
+  }
 }
 
 int main() {
+  int gamemode;
   char word[WORD_COUNT+1]; 
   getWord(word);
 
-  printf("Welcome to Wordle, enter a word to start guessing, word is %s", word);
-  gameplayLoop(word, stdin);
+  printf("Welcome to Wordle, choose (1) standard or (2) unlimited guess: ");
+  scanf("%d", &gamemode);
 
-  printf("\nCongratulations, the word is: %s", word);
+  switch (gamemode) {
+    case 2:
+      unlimitedGameplayLoop(word, stdin);
+      break;
+    default:
+      defaultGameplayLoop(word, stdin);
+      break;
+  }
 
   return 0;
 }
 
+//Todo list: 1. fix word having newline, 2. validate valid word from list, 3. add message for defautl mode
